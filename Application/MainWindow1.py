@@ -28,27 +28,15 @@ class Ui_MainWindow(object):
             
             self.np1 = [self.a,self.b,self.HbA1c_box_text,self.FPG_box_text,self.PPG_box_text,self.listo]
             
-            
-            
-            dataframe = pd.read_excel("Preprocessed_data.xlsx")
-            
-            dat = [dataframe['Age '],dataframe['BMI'],dataframe['Hba1c'],
-                   dataframe['FPG'],dataframe['PPG'],dataframe['HTN'],
-                   dataframe['DYLP'],dataframe['CKD'],dataframe['Pregn']
-                   ]
-            X = np.asarray(dat).transpose()
-            y = np.asarray(dataframe['Duration lasting till'])
             m = self.np1.pop(-1)
             self.np1 = self.np1 + m
             self.np1 = np.asarray(self.np1)
             self.np1 = self.np1.reshape(1,-1)        
+            import pickle
+            model = pickle.load(open('Model File.sav','rb'))
+            y_predrf = model.predict(self.np1)
             
-            tree = DecisionTreeClassifier()
-            bag = BaggingClassifier(tree, n_estimators=100, max_samples=0.8,
-            random_state=1)
-            bag.fit(X, y)
-            
-            y_predrf = bag.predict(self.np1)
+            #y_predrf = bag.predict(self.np1)
             if y_predrf[0] == 0:
                 out = "You don't require a long term treatment,just follow the following...."
             elif y_predrf[0] == 1:
@@ -58,11 +46,7 @@ class Ui_MainWindow(object):
             elif y_predrf[0] == 3:
                 out = "The Duration for the treatment would be 11-20 years or more than that"
             
-            y_treatment = np.asarray(dataframe['Diabetes treatment'])
-    
-            classifiersk = DecisionTreeClassifier()
-            classifiersk.fit(X,y_treatment)
-    
+            classifiersk = pickle.load(open('Model File Treatment.sav','rb'))
             y_predPres = classifiersk.predict(self.np1)
             for i in y_predPres:
                 break
@@ -502,7 +486,7 @@ class Ui_MainWindow(object):
         self.Weight_label.setText(_translate("MainWindow", "Weight(kgs)"))
         self.Height_label.setText(_translate("MainWindow", "Height(Choose the Unit below)"))
         self.Inches_button.setText(_translate("MainWindow", "Inches"))
-        self.Cms_button.setText(_translate("MainWindow", "Centimetres"))
+        self.Cms_button.setText(_translate("MainWindow", "Metres"))
         self.Foot_button.setText(_translate("MainWindow", "Foot"))
         self.HbA1c_label.setText(_translate("MainWindow", "HbA1c :-"))
         self.PPG_label.setText(_translate("MainWindow", "PPG :-"))
