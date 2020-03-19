@@ -1,82 +1,636 @@
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from LastPage import *
-import pandas as pd 
-import numpy as np
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import BaggingClassifier
-from About import *
-from PyQt5.QtCore import pyqtSlot
 
-class Ui_MainWindow(object):
-    def call2(self):
+from PyQt5 import QtCore, QtGui, QtWidgets
+import pyrebase
+import numpy as np
+import time
+import re
+from About import *
+
+
+
+firebaseConfig = {
+     "apiKey": "AIzaSyDEi-6Vm4DqAyC69kbBUXMCRSMhKJcHt3w",
+    "authDomain": "udata-b0869.firebaseapp.com",
+    "databaseURL": "https://udata-b0869.firebaseio.com",
+    "projectId": "udata-b0869",
+    "storageBucket": "udata-b0869.appspot.com",
+    "messagingSenderId": "855266842555",
+    "appId": "1:855266842555:web:255b71f913ff83c33b969e",
+    "measurementId": "G-8CVRQ9ET6L"
+
+    }
+
+firebase = pyrebase.initialize_app(firebaseConfig)
+auth = firebase.auth()
+
+
+class Ui_DialogSignin(object):
+    
+    def check(self):
+        self.Email = self.EmailEdit.text()
+        self.CreatePassword = self.CreatePasswordEdit.text()
+        self.ConfirmPassword = self.ConfirmPasswordEdit.text()
+        self.Info_label1.setStyleSheet('color:red;\n')
+
+        self.identifier = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)",self.Email)
+    
+        if(self.identifier == None):
+            
+            self.Info_label1.setText("Please enter valid email!!")
+        else:
+            self.Info_label1.setText("Vaild Email!!")
+            if self.CreatePassword != self.ConfirmPassword:
+                self.Info_label1.setText("Passwords Dont match!!Please enter valid passwords!!")
+            else:
+                # print("Everything is alright!!")    
+                
+                self.Firebase()
         
+    def Firebase(self):
+        try:
+            email = self.EmailEdit.text()
+            password = self.CreatePasswordEdit.text()
+            user = auth.create_user_with_email_and_password(email,password)           
+            self.Info_label1.setText("Successful!!")
+            self.Login2
+            
+            
+        except Exception as e:
+            self.Info_label2.setText(str(e))
+            print(e)
+    
+        
+    def Login2(self):
+        self.Dialoglog = QtWidgets.QDialog()
+        self.setupUiLogin(self.Dialoglog)
+        self.Dialoglog.show()
+        DialogSignin.hide()
+    
+    def checkLogin(self):
+        self.Email = self.EamilEdit.text()
+        self.identifier = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)",self.Email)
+        if(self.identifier == None):
+            self.Info_label1.setStyleSheet('color:red;\n')
+            self.Info_label1.setText("Please enter valid email!!")
+        else:
+            self.Info_label1.setText("Vaild Email!!")
+        
+            self.FirebaseLogin()
+    
+    def FirebaseLogin(self):
+
+        try:
+            
+            email = self.EmailEdit.text()
+            password = self.CreatePasswordEdit.text()
+            login = auth.sign_in_with_email_and_password(email,password)            
+            self.Info_label2.setText("Login Was Successful")
+            self.mainWindow()
+                                    
+        except Exception as e:
+            
+            # m = re.match('(.*)message"(.*)"',str(e)).group(0)
+            # n = re.search('/s(.*)',m).group(0)
+            self.Info_label2.setText(str(e))
+    
+    def mainWindow(self):
+        self.MainWindow = QtWidgets.QMainWindow()        
+        self.setupUimain(self.MainWindow)
+        self.MainWindow.show()     
+        self.Dialoglog.hide()
+
+    def forgotPassword(self):
+        email = self.EmailEdit.text()        
+        auth.send_password_reset_email(email)
+        self.Info_label1.setText("An email is sent to you please follow the link.")
+         
+    def setupUiLogin(self, DialogLogin):
+        DialogLogin.setObjectName("DialogLogin")
+        DialogLogin.resize(900, 400)
+        DialogLogin.setMinimumSize(QtCore.QSize(900, 400))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("logo other without back.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("logo other without back.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        DialogLogin.setWindowIcon(icon)
+        DialogLogin.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.gridLayout = QtWidgets.QGridLayout(DialogLogin)
+        self.gridLayout.setObjectName("gridLayout")
+        self.scrollArea = QtWidgets.QScrollArea(DialogLogin)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setObjectName("scrollArea")
+        self.scrollAreaWidgetContents = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 880, 380))
+        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+        self.gridLayout_3 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents)
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        self.gridLayout_2 = QtWidgets.QGridLayout()
+        self.gridLayout_2.setObjectName("gridLayout_2")
+        self.verticalLayout_5 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.labelup = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.labelup.setText("")
+        self.labelup.setObjectName("labelup")
+        self.verticalLayout_5.addWidget(self.labelup)
+        self.logo_label = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.logo_label.setMinimumSize(QtCore.QSize(225, 258))
+        self.logo_label.setStyleSheet("background-image: url(logo other without back.png);")
+        self.logo_label.setText("")
+        self.logo_label.setObjectName("logo_label")
+        self.verticalLayout_5.addWidget(self.logo_label)
+        self.labeldown = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.labeldown.setText("")
+        self.labeldown.setObjectName("labeldown")
+        self.verticalLayout_5.addWidget(self.labeldown)
+        self.gridLayout_2.addLayout(self.verticalLayout_5, 0, 0, 1, 1)
+        self.verticalLayout_4 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_4.setContentsMargins(10, 10, 10, 10)
+        self.verticalLayout_4.setSpacing(2)
+        self.verticalLayout_4.setObjectName("verticalLayout_4")
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.verticalLayout.setContentsMargins(10, 20, 10, 20)
+        self.verticalLayout.setSpacing(20)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.EmailLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.EmailLabel.setStyleSheet("font: 14pt \"MS Reference Sans Serif\";\n"
+"background-color: rgb(146,223,243);\n"
+"border-color: rgb(0,33,100);\n"
+"border-style:solid;\n"
+"border-width:10px;\n"
+"border-radius:20px;\n"
+"")
+        self.EmailLabel.setObjectName("EmailLabel")
+        self.verticalLayout.addWidget(self.EmailLabel)
+        self.PasswordLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.PasswordLabel.setStyleSheet("font: 14pt \"MS Reference Sans Serif\";\n"
+"background-color: rgb(146,223,243);\n"
+"border-color: rgb(0,33,100);\n"
+"border-style:solid;\n"
+"border-width:10px;\n"
+"border-radius:20px;\n"
+"")
+        self.PasswordLabel.setObjectName("PasswordLabel")
+        self.verticalLayout.addWidget(self.PasswordLabel)
+        self.horizontalLayout.addLayout(self.verticalLayout)
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.EmailEdit = QtWidgets.QLineEdit(self.scrollAreaWidgetContents)
+        self.EmailEdit.setStyleSheet("font: 14pt \"MS Reference Sans Serif\";\n"
+"border-color: rgb(0,33,100);\n"
+"border-style:solid;\n"
+"border-width:5px;\n"
+"border-radius:20px;\n"
+"")
+        self.EmailEdit.setObjectName("EmailEdit")
+        self.verticalLayout_2.addWidget(self.EmailEdit)
+        self.CreatePasswordEdit = QtWidgets.QLineEdit(self.scrollAreaWidgetContents)
+        self.CreatePasswordEdit.setStyleSheet("font: 14pt \"MS Reference Sans Serif\";\n"
+"border-color: rgb(0,33,100);\n"
+"border-style:solid;\n"
+"border-width:5px;\n"
+"border-radius:20px;\n"
+"")
+        self.CreatePasswordEdit.setText("")
+        self.CreatePasswordEdit.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.CreatePasswordEdit.setObjectName("CreatePasswordEdit")
+        self.verticalLayout_2.addWidget(self.CreatePasswordEdit)
+        self.horizontalLayout.addLayout(self.verticalLayout_2)
+        self.verticalLayout_4.addLayout(self.horizontalLayout)
+        self.verticalLayout_3 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.Info_label1 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.Info_label1.setText("")
+        self.Info_label1.setObjectName("Info_label1")
+        self.verticalLayout_3.addWidget(self.Info_label1)
+        self.Info_label2 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.Info_label2.setText("")
+        self.Info_label2.setObjectName("Info_label2")
+        self.verticalLayout_3.addWidget(self.Info_label2)
+        self.GO_button = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.GO_button.setStyleSheet("#GO_button{\n"
+"    font: 14pt \"MS Reference Sans Serif\";\n"
+"\n"
+"background-color: rgb(146,223,243);\n"
+"\n"
+"}\n"
+"\n"
+"#GO_button:hover{\n"
+"font: 14pt \"MS Reference Sans Serif\";\n"
+"color:rgb(255, 255, 255);\n"
+"    background-color: rgb(68, 68, 102);\n"
+"border-width:5px;\n"
+"border-style:dotted;\n"
+"border-color:rgb(170, 170, 127);\n"
+"}")
+        self.GO_button.setObjectName("GO_button")
+        self.verticalLayout_3.addWidget(self.GO_button)
+        self.GO_button.clicked.connect(self.mainWindow)
+        self.ForgotPasswordButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.ForgotPasswordButton.setStyleSheet("color: rgb(0,33,100);\n"
+"font: 75 12pt \"MS Serif\";")
+        self.ForgotPasswordButton.setObjectName("ForgotPasswordButton")
+        self.ForgotPasswordButton.clicked.connect(self.forgotPassword)
+        self.verticalLayout_3.addWidget(self.ForgotPasswordButton)
+        self.verticalLayout_4.addLayout(self.verticalLayout_3)
+        self.gridLayout_2.addLayout(self.verticalLayout_4, 0, 1, 1, 1)
+        self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 1, 1)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.gridLayout.addWidget(self.scrollArea, 0, 0, 1, 1)
+
+        self.retranslateUiLogin(DialogLogin)
+        QtCore.QMetaObject.connectSlotsByName(DialogLogin)
+
+    def retranslateUiLogin(self, DialogLogin):
+        _translate = QtCore.QCoreApplication.translate
+        DialogLogin.setWindowTitle(_translate("DialogLogin", "Login"))
+        self.EmailLabel.setText(_translate("DialogLogin", "Email"))
+        self.PasswordLabel.setText(_translate("DialogLogin", "Password"))
+        self.GO_button.setText(_translate("DialogLogin", "Go"))
+        self.ForgotPasswordButton.setText(_translate("DialogLogin", "Forgot Password?Click here."))
+     
+    
+    def setupUiSignIn(self, DialogSignin):
+        DialogSignin.setObjectName("DialogSignin")
+        DialogSignin.resize(900, 422)
+        DialogSignin.setMinimumSize(QtCore.QSize(900, 422))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("logo other without back.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("logo other without back.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        DialogSignin.setWindowIcon(icon)
+        DialogSignin.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.gridLayout = QtWidgets.QGridLayout(DialogSignin)
+        self.gridLayout.setObjectName("gridLayout")
+        self.scrollArea = QtWidgets.QScrollArea(DialogSignin)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setObjectName("scrollArea")
+        self.scrollAreaWidgetContents = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 880, 402))
+        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+        self.gridLayout_3 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents)
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        self.gridLayout_2 = QtWidgets.QGridLayout()
+        self.gridLayout_2.setObjectName("gridLayout_2")
+        self.verticalLayout_5 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.labelup = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.labelup.setText("")
+        self.labelup.setObjectName("labelup")
+        self.verticalLayout_5.addWidget(self.labelup)
+        self.logo_label = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.logo_label.setMinimumSize(QtCore.QSize(225, 258))
+        self.logo_label.setStyleSheet("background-image: url(logo other without back.png);")
+        self.logo_label.setText("")
+        self.logo_label.setObjectName("logo_label")
+        self.verticalLayout_5.addWidget(self.logo_label)
+        self.labeldown = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.labeldown.setText("")
+        self.labeldown.setObjectName("labeldown")
+        self.verticalLayout_5.addWidget(self.labeldown)
+        self.gridLayout_2.addLayout(self.verticalLayout_5, 0, 0, 1, 1)
+        self.verticalLayout_4 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_4.setContentsMargins(10, 10, 10, 10)
+        self.verticalLayout_4.setSpacing(2)
+        self.verticalLayout_4.setObjectName("verticalLayout_4")
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.NameLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.NameLabel.setStyleSheet("font: 14pt \"MS Reference Sans Serif\";\n"
+"background-color: rgb(146,223,243);\n"
+"border-color: rgb(0,33,100);\n"
+"border-style:solid;\n"
+"border-width:10px;\n"
+"border-radius:20px;\n"
+"")
+        self.NameLabel.setObjectName("NameLabel")
+        self.verticalLayout.addWidget(self.NameLabel)
+        self.EmailLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.EmailLabel.setStyleSheet("font: 14pt \"MS Reference Sans Serif\";\n"
+"background-color: rgb(146,223,243);\n"
+"border-color: rgb(0,33,100);\n"
+"border-style:solid;\n"
+"border-width:10px;\n"
+"border-radius:20px;\n"
+"")
+        self.EmailLabel.setObjectName("EmailLabel")
+        self.verticalLayout.addWidget(self.EmailLabel)
+        self.CreatePasswordLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.CreatePasswordLabel.setStyleSheet("font: 14pt \"MS Reference Sans Serif\";\n"
+"background-color: rgb(146,223,243);\n"
+"border-color: rgb(0,33,100);\n"
+"border-style:solid;\n"
+"border-width:10px;\n"
+"border-radius:20px;\n"
+"")
+        self.CreatePasswordLabel.setObjectName("CreatePasswordLabel")
+        self.verticalLayout.addWidget(self.CreatePasswordLabel)
+        self.ConfirmPasswordLAbel = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.ConfirmPasswordLAbel.setStyleSheet("font: 14pt \"MS Reference Sans Serif\";\n"
+"background-color: rgb(146,223,243);\n"
+"border-color: rgb(0,33,100);\n"
+"border-style:solid;\n"
+"border-width:10px;\n"
+"border-radius:20px;\n"
+"")
+        self.ConfirmPasswordLAbel.setObjectName("ConfirmPasswordLAbel")
+        self.verticalLayout.addWidget(self.ConfirmPasswordLAbel)
+        self.horizontalLayout.addLayout(self.verticalLayout)
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.NameEdit = QtWidgets.QLineEdit(self.scrollAreaWidgetContents)
+        self.NameEdit.setStyleSheet("font: 14pt \"MS Reference Sans Serif\";\n"
+"border-color: rgb(0,33,100);\n"
+"border-style:solid;\n"
+"border-width:5px;\n"
+"border-radius:20px;\n"
+"")
+        self.NameEdit.setObjectName("NameEdit")
+        self.verticalLayout_2.addWidget(self.NameEdit)
+        self.EmailEdit = QtWidgets.QLineEdit(self.scrollAreaWidgetContents)
+        self.EmailEdit.setStyleSheet("font: 14pt \"MS Reference Sans Serif\";\n"
+"border-color: rgb(0,33,100);\n"
+"border-style:solid;\n"
+"border-width:5px;\n"
+"border-radius:20px;\n"
+"")
+        self.EmailEdit.setObjectName("EmailEdit")
+        self.verticalLayout_2.addWidget(self.EmailEdit)
+        self.CreatePasswordEdit = QtWidgets.QLineEdit(self.scrollAreaWidgetContents)
+        self.CreatePasswordEdit.setStyleSheet("font: 14pt \"MS Reference Sans Serif\";\n"
+"border-color: rgb(0,33,100);\n"
+"border-style:solid;\n"
+"border-width:5px;\n"
+"border-radius:20px;\n"
+"")
+        self.CreatePasswordEdit.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.CreatePasswordEdit.setObjectName("CreatePasswordEdit")
+        self.verticalLayout_2.addWidget(self.CreatePasswordEdit)
+        self.ConfirmPasswordEdit = QtWidgets.QLineEdit(self.scrollAreaWidgetContents)
+        self.ConfirmPasswordEdit.setStyleSheet("font: 14pt \"MS Reference Sans Serif\";\n"
+"border-color: rgb(0,33,100);\n"
+"border-style:solid;\n"
+"border-width:5px;\n"
+"border-radius:20px;\n"
+"")
+        self.ConfirmPasswordEdit.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.ConfirmPasswordEdit.setObjectName("ConfirmPasswordEdit")
+        self.verticalLayout_2.addWidget(self.ConfirmPasswordEdit)
+        self.horizontalLayout.addLayout(self.verticalLayout_2)
+        self.verticalLayout_4.addLayout(self.horizontalLayout)
+        self.verticalLayout_3 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.Info_label1 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.Info_label1.setText("")
+        self.Info_label1.setObjectName("Info_label1")
+        self.verticalLayout_3.addWidget(self.Info_label1)
+        self.Info_label2 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.Info_label2.setText("")
+        self.Info_label2.setObjectName("Info_label2")
+        self.verticalLayout_3.addWidget(self.Info_label2)
+        self.GO_button = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.GO_button.setStyleSheet("#GO_button{\n"
+"    font: 14pt \"MS Reference Sans Serif\";\n"
+"\n"
+"background-color: rgb(146,223,243);\n"
+"\n"
+"}\n"
+"\n"
+"#GO_button:hover{\n"
+"font: 14pt \"MS Reference Sans Serif\";\n"
+"color:rgb(255, 255, 255);\n"
+"    background-color: rgb(68, 68, 102);\n"
+"border-width:5px;\n"
+"border-style:dotted;\n"
+"border-color:rgb(170, 170, 127);\n"
+"}")
+        self.GO_button.setObjectName("GO_button")
+        self.verticalLayout_3.addWidget(self.GO_button)
+        self.GO_button.clicked.connect(self.check)
+        self.LoginButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.LoginButton.setStyleSheet("color: rgb(0,33,100);\n"
+"font: 75 12pt \"MS Serif\";")
+        self.LoginButton.setObjectName("LoginButton")
+        self.LoginButton.clicked.connect(self.Login2)
+        self.verticalLayout_3.addWidget(self.LoginButton)
+        self.verticalLayout_4.addLayout(self.verticalLayout_3)
+        self.gridLayout_2.addLayout(self.verticalLayout_4, 0, 1, 1, 1)
+        self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 1, 1)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.gridLayout.addWidget(self.scrollArea, 0, 0, 1, 1)
+
+        self.retranslateUiSignIn(DialogSignin)
+        QtCore.QMetaObject.connectSlotsByName(DialogSignin)
+
+    def retranslateUiSignIn(self, DialogSignin):
+        _translate = QtCore.QCoreApplication.translate
+        DialogSignin.setWindowTitle(_translate("DialogSignin", "Sign Up Page"))
+        self.NameLabel.setText(_translate("DialogSignin", "Name"))
+        self.EmailLabel.setText(_translate("DialogSignin", "Email"))
+        self.CreatePasswordLabel.setText(_translate("DialogSignin", "Create Password"))
+        self.ConfirmPasswordLAbel.setText(_translate("DialogSignin", "Confirm Password"))
+        self.GO_button.setText(_translate("DialogSignin", "Go"))
+        self.LoginButton.setText(_translate("DialogSignin", "Already Have an Account?Click here."))
+
+    def checkmistaes(self):
         if self.Noa_box.isChecked() == True and self.H_box.isChecked() == True or self.C_box.isChecked() == True or self.P_box.isChecked() == True:
             self.WarningLabel.setStyleSheet("color:red; font: 12pt'MS Sans Serif'")
             self.WarningLabel.setText("Please Select None of the above or the other cormobidities!!")
             if self.Name_box.text == "" or self.Age_box.value() == 0 or self.Weight_box.value() == 0 or self.Height_box.value == 0 or self.PPG_box.value == 0 or self.FPG_box.value == 0 or self.HbA1c_box.value == 0:
                 self.LabelWarning2.setStyleSheet("color:red; font: 12pt'MS Sans Serif'")
                 self.LabelWarning2.setText("Please fill all the details!!")
-        
-        else:   
-        
-            if __name__ == '__main__':
-                self.Name_box_text = self.Name_box.text()
-                self.Age_box_text = self.Age_box.value()
-                self.Weight_box_text = self.Weight_box.value()
-                self.Height_box_text = self.Height_box.value()
-                self.PPG_box_text = self.PPG_box.value()
-                self.FPG_box_text = self.FPG_box.value()
-                self.HbA1c_box_text = self.HbA1c_box.value()
-                self.winn = QtWidgets.QMainWindow()
-                self.obj_n = Ui_LastPage()
-                self.obj_n.setup(self.winn)
-                self.winn.show()            
-                self.a = self.Age(self.Age_box_text)
-                self.listo = self.cormobidities()
-                self.hei = self.height_entered(self.Height_box_text)
-                self.Bmi = self.BMI(self.hei,self.Weight_box_text)
-                self.b = self.BMI_check(self.Bmi)
-                
-                self.np1 = [self.a,self.b,self.HbA1c_box_text,self.FPG_box_text,self.PPG_box_text,self.listo]
-                
-                m = self.np1.pop(-1)
-                self.np1 = self.np1 + m
-                self.np1 = np.asarray(self.np1)
-                self.np1 = self.np1.reshape(1,-1)      
-                self.Name_box.setText("")
-                self.Age_box.setValue(0)
-                self.Weight_box.setValue(0)
-                self.Height_box.setValue(0)
-                self.PPG_box.setValue(0)
-                self.FPG_box.setValue(0)
-                self.HbA1c_box.setValue(0)
-    
-                    
-                
-                import pickle
-                model = pickle.load(open('Model File.sav','rb'))
-                y_predrf = model.predict(self.np1)
-                self.Name_box.setText("")
-                #y_predrf = bag.predict(self.np1)
-                if y_predrf[0] == 0:
-                    out = "You don't require a long term treatment,just follow the following...."
-                elif y_predrf[0] == 1:
-                    out = "The Duration for the treatment would be 6 months to 3 years depending on your health"
-                elif y_predrf[0] == 2:
-                    out = "The Duration for the treatment would be 3-10 years"
-                elif y_predrf[0] == 3:
-                    out = "The Duration for the treatment would be 11-20 years or more than that"
-                
-                classifiersk = pickle.load(open('Model File Treatment.sav','rb'))
-                y_predPres = classifiersk.predict(self.np1)
-                for i in y_predPres:
-                    break
-                bmi_out = str(self.Bmi)
-                out = "Your BMI is " + bmi_out + "\n" + out + "\nYou will have to follow the following\n" + i
-                self.obj_n.O_label.setText(out)
-                 
-         
+        else:
+            self.LabelWarning2.setText("Valid Inputs Given!!!")
+            self.call2()
+
+    def call2(self):
+        self.LabelWarning2.setText("")
+        self.WarningLabel.setText("")
+        if __name__ == '__main__':
+            print("Into this shit")
+            
+            self.Name_box_text = self.Name_box.text()
+            self.Age_box_text = self.Age_box.value()
+            self.Weight_box_text = self.Weight_box.value()
+            self.Height_box_text = self.Height_box.value()
+            self.PPG_box_text = self.PPG_box.value()
+            self.FPG_box_text = self.FPG_box.value()
+            self.HbA1c_box_text = self.HbA1c_box.value()
+            print("calling Lastpage")
+            self.winn = QtWidgets.QMainWindow()
+            
+            self.setup(self.winn)
+            self.winn.show()            
+            self.a = self.Age(self.Age_box_text)
+            self.listo = self.cormobidities()
+            self.hei = self.height_entered(self.Height_box_text)
+            self.Bmi = self.BMI(self.hei,self.Weight_box_text)
+            self.b = self.BMI_check(self.Bmi)
+            
+            self.np1 = [self.a,self.b,self.HbA1c_box_text,self.FPG_box_text,self.PPG_box_text,self.listo]
+            print("Performing evrythong!")
+            m = self.np1.pop(-1)
+            self.np1 = self.np1 + m
+            self.np1 = np.asarray(self.np1)
+            self.np1 = self.np1.reshape(1,-1)      
+            self.Name_box.setText("")
+            self.Age_box.setValue(0)
+            self.Weight_box.setValue(0)
+            self.Height_box.setValue(0)
+            self.PPG_box.setValue(0)
+            self.FPG_box.setValue(0)
+            self.HbA1c_box.setValue(0)
+
+            import pickle
+            model = pickle.load(open('Model File.sav','rb'))
+            y_predrf = model.predict(self.np1)
+            self.Name_box.setText("")
+            #y_predrf = bag.predict(self.np1)
+            if y_predrf[0] == 0:
+                out = "You don't require a long term treatment,just follow the following...."
+            elif y_predrf[0] == 1:
+                out = "The Duration for the treatment would be 6 months to 3 years depending on your health"
+            elif y_predrf[0] == 2:
+                out = "The Duration for the treatment would be 3-10 years"
+            elif y_predrf[0] == 3:
+                out = "The Duration for the treatment would be 11-20 years or more than that"
+            
+            classifiersk = pickle.load(open('Model File Treatment.sav','rb'))
+            y_predPres = classifiersk.predict(self.np1)
+            for i in y_predPres:
+                break
+            bmi_out = str(self.Bmi)
+            out = "Your BMI is " + bmi_out + "\n" + out + "\nYou will have to follow the following\n" + i
+            self.O_label.setText(out)
+            
+             
+    def setup(self, LastPage):
+        LastPage.setObjectName("LastPage")
+        LastPage.resize(794, 525)
+        LastPage.setMinimumSize(QtCore.QSize(794, 525))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("logo other without back.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("logo other without back.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        LastPage.setWindowIcon(icon)
+        LastPage.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.centralwidget = QtWidgets.QWidget(LastPage)
+        self.centralwidget.setObjectName("centralwidget")
+        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
+        self.gridLayout.setObjectName("gridLayout")
+        self.scrollArea = QtWidgets.QScrollArea(self.centralwidget)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setObjectName("scrollArea")
+        self.scrollAreaWidgetContents = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 774, 464))
+        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+        self.gridLayout_6 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents)
+        self.gridLayout_6.setObjectName("gridLayout_6")
+        self.gridLayout_5 = QtWidgets.QGridLayout()
+        self.gridLayout_5.setObjectName("gridLayout_5")
+        self.gridLayout_4 = QtWidgets.QGridLayout()
+        self.gridLayout_4.setObjectName("gridLayout_4")
+        self.scrollArea_2 = QtWidgets.QScrollArea(self.scrollAreaWidgetContents)
+        self.scrollArea_2.setWidgetResizable(True)
+        self.scrollArea_2.setObjectName("scrollArea_2")
+        self.scrollAreaWidgetContents_2 = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 750, 288))
+        self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
+        self.gridLayout_2 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents_2)
+        self.gridLayout_2.setObjectName("gridLayout_2")
+        self.O_label = QtWidgets.QLabel(self.scrollAreaWidgetContents_2)
+        self.O_label.setStyleSheet("background-color: rgb(146,223,243);\n"
+"font: 14pt \"MS Reference Sans Serif\";")
+        self.O_label.setText("")
+        self.O_label.setObjectName("O_label")
+        self.gridLayout_2.addWidget(self.O_label, 0, 0, 1, 1)
+        self.scrollArea_2.setWidget(self.scrollAreaWidgetContents_2)
+        self.gridLayout_4.addWidget(self.scrollArea_2, 0, 0, 1, 1)
+        self.gridLayout_3 = QtWidgets.QGridLayout()
+        self.gridLayout_3.setContentsMargins(10, 10, 10, 10)
+        self.gridLayout_3.setSpacing(10)
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        self.R_q = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.R_q.setStyleSheet("border-style:solid;\n"
+"border-width:10px;\n"
+"border-radius:20px;\n"
+"border-color:rgb(0,33,100);\n"
+"font: 14pt \"MS Reference Sans Serif\";")
+        self.R_q.setObjectName("R_q")
+        self.gridLayout_3.addWidget(self.R_q, 0, 0, 1, 1)
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.Yes = QtWidgets.QRadioButton(self.scrollAreaWidgetContents)
+        self.Yes.setStyleSheet("background-color: rgb(146,223,243);\n"
+"font: 14pt \"MS Reference Sans Serif\";")
+        self.Yes.setObjectName("Yes")
+        self.horizontalLayout.addWidget(self.Yes)
+        self.No = QtWidgets.QRadioButton(self.scrollAreaWidgetContents)
+        self.No.setStyleSheet("background-color: rgb(146,223,243);\n"
+"font: 14pt \"MS Reference Sans Serif\";")
+        self.No.setObjectName("No")
+        self.horizontalLayout.addWidget(self.No)
+        self.gridLayout_3.addLayout(self.horizontalLayout, 1, 0, 1, 1)
+        self.gridLayout_4.addLayout(self.gridLayout_3, 1, 0, 1, 1)
+        self.gridLayout_5.addLayout(self.gridLayout_4, 0, 0, 1, 1)
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.label = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.label.setText("")
+        self.label.setObjectName("label")
+        self.horizontalLayout_2.addWidget(self.label)
+        self.New_button = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.New_button.setStyleSheet("#New_button\n"
+"{background-color: rgb(146,223,243);\n"
+"font: 14pt \"MS Reference Sans Serif\";\n"
+"border-style:solid;\n"
+"border-width:5px;\n"
+"border-radius:20px;\n"
+"border-color:rgb(0, 33,100);\n"
+"}\n"
+"#New_button:hover{\n"
+"background-color: rgb(0, 170, 170);\n"
+"}")
+        self.New_button.setObjectName("New_button")
+        self.horizontalLayout_2.addWidget(self.New_button)
+        self.gridLayout_5.addLayout(self.horizontalLayout_2, 1, 0, 1, 1)
+        self.gridLayout_6.addLayout(self.gridLayout_5, 0, 0, 1, 1)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.gridLayout.addWidget(self.scrollArea, 0, 0, 1, 1)
+        LastPage.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(LastPage)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 794, 21))
+        self.menubar.setObjectName("menubar")
+        self.menuMENU = QtWidgets.QMenu(self.menubar)
+        self.menuMENU.setObjectName("menuMENU")
+        LastPage.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(LastPage)
+        self.statusbar.setObjectName("statusbar")
+        LastPage.setStatusBar(self.statusbar)
+        self.actionNew = QtWidgets.QAction(LastPage)
+        self.actionNew.setObjectName("actionNew")
+        self.actionAbout = QtWidgets.QAction(LastPage)
+        self.actionAbout.setObjectName("actionAbout")
+        self.menuMENU.addAction(self.actionNew)
+        self.menuMENU.addSeparator()
+        self.menuMENU.addAction(self.actionAbout)
+        self.menubar.addAction(self.menuMENU.menuAction())
+
+        self.retranslate(LastPage)
+        QtCore.QMetaObject.connectSlotsByName(LastPage)
+
+    def retranslate(self, LastPage):
+        _translate = QtCore.QCoreApplication.translate
+        LastPage.setWindowTitle(_translate("LastPage", "MainWindow"))
+        self.R_q.setText(_translate("LastPage", "Was the Question Helpful?"))
+        self.Yes.setText(_translate("LastPage", "YES"))
+        self.No.setText(_translate("LastPage", "NO"))
+        self.New_button.setText(_translate("LastPage", "New"))
+        self.menuMENU.setTitle(_translate("LastPage", "MENU"))
+        self.actionNew.setText(_translate("LastPage", "New"))
+        self.actionAbout.setText(_translate("LastPage", "About"))
+
     
     def Age(self,age):
         
@@ -477,7 +1031,9 @@ class Ui_MainWindow(object):
 "}")
         self.Go_Button.setObjectName("Go_Button")
         self.horizontalLayout_4.addWidget(self.Go_Button)
-        self.Go_Button.clicked.connect(self.call2)
+        self.Go_Button.clicked.connect(self.checkmistaes)
+        self.Noa_box.setChecked(True)
+
         self.verticalLayout_3.addLayout(self.horizontalLayout_4)
         self.gridLayout_4.addLayout(self.verticalLayout_3, 0, 0, 1, 1)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -507,13 +1063,7 @@ class Ui_MainWindow(object):
         self.retranslateUimain(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         self.actionAbout.triggered.connect(lambda:self.aboutpage())
-        self.Noa_box.setChecked(True)
        
-           
-          
-        
-    
-             
          
     def aboutpage(self):
         self.Dialog = QtWidgets.QDialog()
@@ -530,7 +1080,7 @@ class Ui_MainWindow(object):
         self.Weight_label.setText(_translate("MainWindow", "Weight(kgs)*"))
         self.Height_label.setText(_translate("MainWindow", "Height(Choose the Unit below)*"))
         self.Inches_button.setText(_translate("MainWindow", "Inches"))
-        self.Cms_button.setText(_translate("MainWindow", "Centimetres"))
+        self.Cms_button.setText(_translate("MainWindow", "Metres"))
         self.Foot_button.setText(_translate("MainWindow", "Feet"))
         self.HbA1c_label.setText(_translate("MainWindow", "HbA1c* :-"))
         self.PPG_label.setText(_translate("MainWindow", "PPG* :-"))
@@ -551,8 +1101,8 @@ class Ui_MainWindow(object):
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUimain(MainWindow)
-    MainWindow.show()
+    DialogSignin = QtWidgets.QDialog()
+    ui = Ui_DialogSignin()
+    ui.setupUiSignIn(DialogSignin)
+    DialogSignin.show()
     sys.exit(app.exec_())
